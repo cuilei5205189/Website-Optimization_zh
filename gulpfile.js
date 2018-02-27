@@ -11,16 +11,16 @@ var gulp = require('gulp');
 
 // Concat multiple JS files.
 gulp.task("concatScripts", function(){
-    gulp.src(['src/js/*.js', '!src/js/perfmatters.js'])
+    gulp.src(['/js/*.js'])
         .pipe(concat('main.js'))
-        // .pipe(rename({suffix: '.min'}))
-        // .pipe(uglify())
+        .pipe(rename({suffix: '.min'}))
+        .pipe(uglify())
         .pipe(gulp.dest('dist/js'));
 });
 
 // Minify JS files used in index.
 gulp.task('minifyScripts', function() {
-    gulp.src("js/perfmatters.js")
+    gulp.src("src/js/perfmatters.js")
         .pipe(uglify())
         .pipe(rename('app.min.js'))
         .pipe(gulp.dest('dist/js'));
@@ -29,24 +29,25 @@ gulp.task('minifyScripts', function() {
 // Concat CSS
 gulp.task('concatCSS', function() {
     gulp.src([
-        'css/print.css',
-        'css/style.css'
+        'src/css/print.css',
+        'src/css/style.css'
         ])
-        .pipe(rename('main.css'))
+        // .pipe(concat('main.css'))
+        .pipe(minifyCSS())
         .pipe(gulp.dest('dist/css'));
 });
 
-// Minify CSS
+// minify CSS
 gulp.task('minifyCSS', function() {
-    gulp.src("css/main.css")
+    gulp.src(['views/css/style.css'])
         .pipe(minifyCSS())
-        .pipe(rename('main.min.css'))
-        .pipe(gulp.dest('dist/css'));
+        .pipe(rename({suffix: '.min'}))
+        .pipe(gulp.dest('views/css'));
 });
 
 // Minify HTML
 gulp.task('minifyHTML', function() {
-    gulp.src("index.html")
+    gulp.src("src/index.html")
         .pipe(minifyHTML())
         .pipe(rename('index.html'))
         .pipe(gulp.dest('dist'));
@@ -54,10 +55,11 @@ gulp.task('minifyHTML', function() {
 
 // optimize images
 gulp.task('images', function(){
-  return gulp.src(['img/**/*.+(png|jpg|gif|svg)',
-                    'views/images//**/*.+(png|jpg|gif|svg)'])
+   gulp.src(['img/**/*.+(png|jpg|gif|svg)',
+   'views/images//**/*.+(png|jpg|gif|svg)'])
   .pipe(imagemin())
-  .pipe(gulp.dest('dist/img'))
+  .pipe(rename({suffix: '.min'}))
+  .pipe(gulp.dest('dist/'))
 });
 
 // clean
@@ -68,5 +70,5 @@ gulp.task('clean', function() {
 
 //批量执行任务
 gulp.task('build', function(cb) {
-    runSequence('clean', ['minifyHTML', 'minifyCSS', 'concatScripts','concatCSS', 'images'], cb);
+    runSequence('clean', ['minifyHTML', 'concatScripts','concatCSS', 'images'], cb);
 });
