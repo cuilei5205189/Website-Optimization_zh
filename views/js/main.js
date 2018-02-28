@@ -438,20 +438,32 @@ var resizePizzas = function(size) {
       }
     }
 
-    var newSize = sizeSwitcher(size);
-    var dx = (newSize - oldSize) * windowWidth;
-
-    return dx;
-  }
+  //   var newSize = sizeSwitcher(size);
+  //   var dx = (newSize - oldSize) * windowWidth;
+  //
+  //   return dx;
+  // }
 
   // 遍历披萨的元素并改变它们的宽度
+  // function changePizzaSizes(size) {
+  //   for (var i = 0; i < document.querySelectorAll(".randomPizzaContainer").length; i++) {
+  //     var dx = determineDx(document.querySelectorAll(".randomPizzaContainer")[i], size);
+  //     var newwidth = (document.querySelectorAll(".randomPizzaContainer")[i].offsetWidth + dx) + 'px';
+  //     document.querySelectorAll(".randomPizzaContainer")[i].style.width = newwidth;
+  //   }
+  // }
+
   function changePizzaSizes(size) {
-    for (var i = 0; i < document.querySelectorAll(".randomPizzaContainer").length; i++) {
-      var dx = determineDx(document.querySelectorAll(".randomPizzaContainer")[i], size);
-      var newwidth = (document.querySelectorAll(".randomPizzaContainer")[i].offsetWidth + dx) + 'px';
-      document.querySelectorAll(".randomPizzaContainer")[i].style.width = newwidth;
+      //原来的changePizzaSize函数会在for循环中重新多次读取元素的offsetwidth，
+      //这会引起样式更改和重新布局，由于每个PizzaContainer的offsetwidth实际上是一样的，
+      //因此这是不必要的读取，故将其删去并简化。
+      var dx = determineDx(size);
+      var objs = document.querySelectorAll(".randomPizzaContainer");
+    for (var i = 0; i < objs.length; i++) {
+      objs[i].style.width = dx + '%';
     }
   }
+
 
   changePizzaSizes(size);
 
@@ -504,6 +516,10 @@ function updatePositions() {
     items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
   }
 
+  //使用requestAnimationFrame来优化动画，动画绘制操作都转移进新增的render函数中
+    window.requestAnimationFrame(render);
+
+
   // 再次使用User Timing API。这很值得学习
   // 能够很容易地自定义测量维度
   window.performance.mark("mark_end_frame");
@@ -513,6 +529,17 @@ function updatePositions() {
     logAverageFrame(timesToUpdatePosition);
   }
 }
+
+//基本上实现了原来的updatePositions函数的功能，将一些操作从循环中移出以优化性能，
+//另外，用transform代替了left以避免强制同步布局
+function render(){
+    var items = document.querySelectorAll('.mover');
+    var p = document.body.scrollTop / 1250;
+    for (var i = 0; i < items.length; i++) {
+      var phase = Math.sin( p + (i % 5));
+      items[i].style.transform = "translateX("+ (100 * phase) +"px)";
+    }
+};
 
 // 在页面滚动时运行updatePositions函数
 window.addEventListener('scroll', updatePositions);
@@ -529,7 +556,11 @@ document.addEventListener('DOMContentLoaded', function() {
     elem.style.width = "73.333px";
     elem.basicLeft = (i % cols) * s;
     elem.style.top = (Math.floor(i / cols) * s) + 'px';
-    document.querySelector("#movingPizzas1").appendChild(elem);
-  }
-  updatePositions();
-});
+    //由于更改了移动pizza的css属性为transform故在这里初始化left
+    //给pizza增加will-change属性来避免图层重绘制
+    elem.style.left = elem.basicLeft + 'px';
+    elem.style['will-change'] = "transform";
+    document.getElementById("movingPizzas1").appendChild(elem);
+    }
+      updatePositions();
+    });
