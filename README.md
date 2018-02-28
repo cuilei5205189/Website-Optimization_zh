@@ -17,7 +17,7 @@
   $> ./ngrok http 8080
 ```
 
-####Part 1: 优化 index.html 的 PageSpeed Insights 得分
+#### Part 1: 优化 index.html 的 PageSpeed Insights 得分
 
 -  用gulp.js
   - 压缩图片
@@ -26,7 +26,7 @@
 - 添加media：print
 - 异步JavaScript
 
-####Part 2: 优化 pizza.html 的 FPS（每秒帧数）
+#### Part 2: 优化 pizza.html 的 FPS（每秒帧数）
 
 - 参考避免强制同步布局对 changePizzaSizes 函数进行了重构，先读取样式而后执行更改以避免强制同步布局问题。
 - 使用 requestAnimationFrame 优化 updatePositions 中的绘制动画操作。
